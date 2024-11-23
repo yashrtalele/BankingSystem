@@ -242,6 +242,7 @@ class Customer {
                     return;
                 }
                 loan.payOffLoan(amount);
+                System.out.println("Loan paid off!");
                 return;
             }
         }
@@ -314,6 +315,14 @@ public class BankingSystem {
         for (Customer customer: customers) {
             if (customer.getName().equalsIgnoreCase(name)) {
                 return customer;
+            }
+        }
+        return null;
+    }
+    public Employee findEmployeeByName(String name) {
+        for (Employee employee: employees) {
+            if (employee.getName().equalsIgnoreCase(name)) {
+                return employee;
             }
         }
         return null;
