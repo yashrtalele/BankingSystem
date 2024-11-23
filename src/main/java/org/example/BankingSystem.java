@@ -1,31 +1,25 @@
 package org.example;
-
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-
 // Base class for all accounts
 abstract class Account {
     private static final AtomicInteger accountCounter = new AtomicInteger(1);
     private final int accountNumber;
     private double balance;
     private final Customer owner;
-    private final List<Transaction> transactions;
-
+    private final List < Transaction > transactions;
     public Account(Customer owner) {
         this.accountNumber = accountCounter.getAndIncrement();
         this.balance = 0.0;
         this.owner = owner;
-        this.transactions = new ArrayList<>();
+        this.transactions = new ArrayList < > ();
     }
-
     public int getAccountNumber() {
         return accountNumber;
     }
-
     public double getBalance() {
         return balance;
     }
-
     public void deposit(double amount) {
         if (amount > 0) {
             balance += amount;
@@ -34,7 +28,6 @@ abstract class Account {
             System.out.println("Amount to deposit should be positive.");
         }
     }
-
     public void withdraw(double amount) {
         if (amount > 0 && amount <= balance) {
             balance -= amount;
@@ -43,7 +36,6 @@ abstract class Account {
             System.out.println("Insufficient balance or invalid amount.");
         }
     }
-
     public void transfer(Account toAccount, double amount) {
         if (amount > 0 && amount <= balance) {
             this.withdraw(amount);
@@ -53,33 +45,26 @@ abstract class Account {
             System.out.println("Insufficient balance or invalid amount.");
         }
     }
-
     public Customer getOwner() {
         return owner;
     }
-
-    public List<Transaction> getTransactions() {
+    public List < Transaction > getTransactions() {
         return transactions;
     }
-
     public abstract void applyInterest();
-
     public void printTransactions() {
         System.out.println("Transaction history for account " + accountNumber + ":");
-        for (Transaction t : transactions) {
+        for (Transaction t: transactions) {
             System.out.println(t);
         }
     }
 }
-
 // Savings account with interest
 class SavingsAccount extends Account {
     private static final double INTEREST_RATE = 0.03; // 3% annual interest
-
     public SavingsAccount(Customer owner) {
         super(owner);
     }
-
     @Override
     public void applyInterest() {
         double interest = getBalance() * INTEREST_RATE;
@@ -87,15 +72,12 @@ class SavingsAccount extends Account {
         System.out.println("Interest applied: " + interest);
     }
 }
-
 // Current account with overdraft
 class CurrentAccount extends Account {
     private static final double OVERDRAFT_LIMIT = -500.00;
-
     public CurrentAccount(Customer owner) {
         super(owner);
     }
-
     @Override
     public void withdraw(double amount) {
         if (amount > 0 && getBalance() - amount >= OVERDRAFT_LIMIT) {
@@ -104,31 +86,26 @@ class CurrentAccount extends Account {
             System.out.println("Overdraft limit reached or invalid amount.");
         }
     }
-
     @Override
     public void applyInterest() {
         // No interest on current accounts
     }
 }
-
 // Transaction class to hold transaction details
 class Transaction {
     private final String type;
     private final double amount;
     private final double postBalance;
     private final int toAccountNumber;
-
     public Transaction(String type, double amount, double postBalance) {
         this(type, amount, postBalance, -1);
     }
-
     public Transaction(String type, double amount, double postBalance, int toAccountNumber) {
         this.type = type;
         this.amount = amount;
         this.postBalance = postBalance;
         this.toAccountNumber = toAccountNumber;
     }
-
     @Override
     public String toString() {
         if (toAccountNumber != -1) {
@@ -138,9 +115,7 @@ class Transaction {
         }
     }
 }
-
 // Loan class
-
 class Loan {
     private static final AtomicInteger loanCounter = new AtomicInteger(1656);
     private final int loanId;
@@ -149,7 +124,6 @@ class Loan {
     private double initialLoanAmount;
     private boolean approved;
     private boolean closed;
-
     public Loan(Customer customer, double loanAmount) {
         this.loanId = loanCounter.getAndIncrement();
         this.customer = customer;
@@ -158,59 +132,49 @@ class Loan {
         this.approved = false;
         this.closed = false;
     }
-
     public int getLoanId() {
         return loanId;
     }
-
     public Customer getCustomer() {
         return customer;
     }
-
     public double getLoanAmount() {
         return loanAmount;
     }
-
-    public double getInitialLoanAmount(){
+    public double getInitialLoanAmount() {
         return initialLoanAmount;
     }
-
     public boolean isApproved() {
         return approved;
     }
-
     public boolean isClosed() {
         return closed;
     }
-
     public void approveLoan() {
         this.approved = true;
         this.customer.getAccounts().get(0).deposit(loanAmount);
     }
-    public boolean checkIsEligible(double amount){
+    public boolean checkIsEligible(double amount) {
         double currentBalance = customer.getAccounts().get(0).getBalance();
-        return currentBalance>=amount;
+        return currentBalance >= amount;
     }
-
-    public void paidOff(double amount){
+    public void paidOff(double amount) {
         double currentBalance = customer.getAccounts().get(0).getBalance();
-        if(currentBalance>amount){
+        if (currentBalance > amount) {
             customer.getAccounts().get(0).withdraw(amount);
         }
     }
-
     public void payOffLoan(double amount) {
         boolean isEligible = checkIsEligible(amount);
-        if(!isEligible){
+        if (!isEligible) {
             System.out.println("You do not have enough balance to pay off this loan currently!");
             System.out.println("Please try a lower amount");
-        }
-        else if (amount > 0 && amount <= loanAmount) {
+        } else if (amount > 0 && amount <= loanAmount) {
             loanAmount -= amount;
-            if(loanAmount==0){
+            if (loanAmount == 0) {
                 closeLoan();
                 System.out.println("You have completely paid off the loan.");
-            }else{
+            } else {
                 System.out.println("Payment of " + amount + " received. Remaining Loan balance: " + loanAmount);
             }
             paidOff(amount);
@@ -218,97 +182,84 @@ class Loan {
             System.out.println("Invalid payment amount.");
         }
     }
-    public void closeLoan(){
+    public void closeLoan() {
         this.closed = true;
     }
 }
-
 // Customer class
 class Customer {
     private final String name;
     private final String address;
     private final String phoneNumber;
     private final String username;
-    private  String password;
-    private final List<Account> accounts;
-    private final List<Loan> loans;
-
+    private String password;
+    private final List < Account > accounts;
+    private final List < Loan > loans;
     public Customer(String name, String address, String phoneNumber, String username, String password) {
         this.name = name;
         this.address = address;
         this.phoneNumber = phoneNumber;
         this.username = username;
         this.password = password;
-        this.accounts = new ArrayList<>();
-        this.loans = new ArrayList<>();
+        this.accounts = new ArrayList < > ();
+        this.loans = new ArrayList < > ();
     }
-
     public String getName() {
         return name;
     }
-
     public String getAddress() {
         return address;
     }
-
     public String getPhoneNumber() {
         return phoneNumber;
     }
-
     public String getUsername() {
         return username;
     }
-
     public String getPassword() {
         return password;
     }
-
     public void setPassword(String password) {
         this.password = password;
     }
-
-    public List<Account> getAccounts() {
+    public List < Account > getAccounts() {
         return accounts;
     }
-
     public void addAccount(Account account) {
         accounts.add(account);
     }
-
     public void applyForLoan(double amount) {
         Loan loan = new Loan(this, amount);
         loans.add(loan);
         System.out.println("Loan application for " + amount + " submitted.");
-        System.out.println("You loan unique id is: " +loan.getLoanId());
+        System.out.println("You loan unique id is: " + loan.getLoanId());
     }
     public void payOffLoan(int loanId, double amount) {
-        for (Loan loan : loans) {
+        for (Loan loan: loans) {
             if (loan.getLoanId() == loanId) {
-                if(!loan.isApproved()){
+                if (!loan.isApproved()) {
                     System.out.println("Loan is not yet approved!");
                     return;
                 }
-                loan.payOffLoan(amount); return;
+                loan.payOffLoan(amount);
+                return;
             }
         }
         System.out.println("Loan not found.");
     }
-
-    public List<Loan> getLoans() {
+    public List < Loan > getLoans() {
         return loans;
     }
-
-    public List<Loan> getOlderLoans(){
-        List<Loan> olderLoans = new ArrayList<>();
-        for(Loan loan : loans){
-            if(loan.isClosed()){
+    public List < Loan > getOlderLoans() {
+        List < Loan > olderLoans = new ArrayList < > ();
+        for (Loan loan: loans) {
+            if (loan.isClosed()) {
                 olderLoans.add(loan);
             }
         }
         return olderLoans;
     }
 }
-
 //Employee class
 class Employee {
     private final String name;
@@ -317,7 +268,6 @@ class Employee {
     private String password;
     private static final AtomicInteger employeeCounter = new AtomicInteger(100);
     private final int employeeNumber;
-
     public Employee(String name, String phoneNumber, String username, String password) {
         this.name = name;
         this.phoneNumber = phoneNumber;
@@ -325,66 +275,52 @@ class Employee {
         this.password = password;
         this.employeeNumber = employeeCounter.getAndIncrement();
     }
-
     public String getName() {
         return name;
     }
-
     public String getPhoneNumber() {
         return phoneNumber;
     }
-
     public String getUsername() {
         return username;
     }
-
     public String getPassword() {
         return password;
     }
-
     public void setPassword(String password) {
         this.password = password;
     }
-
-    public int getEmployeeNumber(){
+    public int getEmployeeNumber() {
         return this.employeeNumber;
     }
-
 }
-
-
 // Main class
 public class BankingSystem {
-    private final List<Customer> customers;
-    private final List<Employee> employees;
+    private final List < Customer > customers;
+    private final List < Employee > employees;
     private final String adminUsername = "admin";
     private final String adminPassword = "admin123";
-
     public BankingSystem() {
-        this.customers = new ArrayList<>();
-        this.employees = new ArrayList<>();
+        this.customers = new ArrayList < > ();
+        this.employees = new ArrayList < > ();
     }
-
     public void addCustomer(Customer customer) {
         customers.add(customer);
     }
-
     public void addEmployee(Employee employee) {
         employees.add(employee);
     }
-
     public Customer findCustomerByName(String name) {
-        for (Customer customer : customers) {
+        for (Customer customer: customers) {
             if (customer.getName().equalsIgnoreCase(name)) {
                 return customer;
             }
         }
         return null;
     }
-
     public Account findAccountByNumber(int accountNumber) {
-        for (Customer customer : customers) {
-            for (Account account : customer.getAccounts()) {
+        for (Customer customer: customers) {
+            for (Account account: customer.getAccounts()) {
                 if (account.getAccountNumber() == accountNumber) {
                     return account;
                 }
@@ -393,8 +329,8 @@ public class BankingSystem {
         return null;
     }
     public Loan findLoanByLoanNumber(int loanNumber) {
-        for (Customer customer : customers) {
-            for (Loan loan : customer.getLoans()) {
+        for (Customer customer: customers) {
+            for (Loan loan: customer.getLoans()) {
                 if (loan.getLoanId() == loanNumber) {
                     return loan;
                 }
@@ -403,15 +339,15 @@ public class BankingSystem {
         return null;
     }
     public Customer authenticateUser(String username, String password) {
-        for (Customer customer : customers) {
+        for (Customer customer: customers) {
             if (customer.getUsername().equals(username) && customer.getPassword().equals(password)) {
                 return customer;
             }
         }
         return null;
     }
-    public Employee authenticateEmployee(String username, String password){
-        for (Employee employee : employees) {
+    public Employee authenticateEmployee(String username, String password) {
+        for (Employee employee: employees) {
             if (employee.getUsername().equals(username) && employee.getPassword().equals(password)) {
                 return employee;
             }
@@ -429,10 +365,9 @@ public class BankingSystem {
             return false;
         }
     }
-
-    public boolean resetEmployeePassword(Employee employee,  String currentPassword, String newPassword){
+    public boolean resetEmployeePassword(Employee employee, String currentPassword, String newPassword) {
         Employee correctEmployee = authenticateEmployee(employee.getUsername(), currentPassword);
-        if(correctEmployee!=null){
+        if (correctEmployee != null) {
             correctEmployee.setPassword(newPassword);
             System.out.println("Password changed successfully.");
             return true;
@@ -440,50 +375,104 @@ public class BankingSystem {
         System.out.println("Invalid current password.");
         return false;
     }
-
-    public List<Loan> getUnapprovedLoans() {
-        List<Loan> unapprovedLoans = new ArrayList<>();
-        for (Customer customer : customers) {
-            for (Loan loan : customer.getLoans()) {
+    public List < Loan > getUnapprovedLoans() {
+        List < Loan > unapprovedLoans = new ArrayList < > ();
+        for (Customer customer: customers) {
+            for (Loan loan: customer.getLoans()) {
                 if (!loan.isApproved() && !loan.isClosed()) {
                     unapprovedLoans.add(loan);
                 }
             }
-        } return unapprovedLoans;
+        }
+        return unapprovedLoans;
     }
-
-    public List<Loan> getApprovedLoans() {
-        List<Loan> approvedLoans = new ArrayList<>();
-        for (Customer customer : customers) {
-            for (Loan loan : customer.getLoans()) {
-                if (loan.isApproved() && !loan.isClosed() ) {
+    public List < Loan > getApprovedLoans() {
+        List < Loan > approvedLoans = new ArrayList < > ();
+        for (Customer customer: customers) {
+            for (Loan loan: customer.getLoans()) {
+                if (loan.isApproved() && !loan.isClosed()) {
                     approvedLoans.add(loan);
                 }
             }
-        } return approvedLoans;
+        }
+        return approvedLoans;
     }
-
-    public List<Loan> getClosedLoans() {
-        List<Loan> closedLoans = new ArrayList<>();
-        for (Customer customer : customers) {
-            for (Loan loan : customer.getLoans()) {
-                if (loan.isClosed() ) {
+    public List < Loan > getClosedLoans() {
+        List < Loan > closedLoans = new ArrayList < > ();
+        for (Customer customer: customers) {
+            for (Loan loan: customer.getLoans()) {
+                if (loan.isClosed()) {
                     closedLoans.add(loan);
                 }
             }
-        } return closedLoans;
+        }
+        return closedLoans;
     }
-
     public boolean authenticateAdmin(String username, String password) {
         return adminUsername.equals(username) && adminPassword.equals(password);
     }
-    public static void initializeData(BankingSystem bankingSystem){
-        String[] name = {"Aarav", "Ananya","Rohan", "Sneha","Arjun", "Meera","Vivek","Neha","Manan","Yash"};
-        String[] addr = {"123 Main St, Apt 4B", "456 Oak Dr, Unit 12", "789 Pine Ln, Suite 300", "101 Maple Ave", "202 Birch Rd, Floor 2", "303 Cedar Blvd", "404 Spruce St", "505 Elm Ct", "606 Willow Way, Apt 7", "707 Ash Pl, Unit 5"};
-        String[] phone = {"9876543210", "8765432109", "7654321098", "6543210987", "5432109876", "4321098765", "3210987654", "2109876543", "1098765432", "0987654321"};
-        String[] username = {"aarav", "ananya", "rohan", "sneha", "arjun", "meera", "vivek", "neha", "manan", "yash"};
-        String[] password = {"aarav", "ananya", "rohan", "sneha", "arjun", "meera", "vivek", "neha", "manan", "yash"};
-        for(int i=0;i<10;i++){
+    public static void initializeData(BankingSystem bankingSystem) {
+        String[] name = {
+                "Aarav",
+                "Ananya",
+                "Rohan",
+                "Sneha",
+                "Arjun",
+                "Meera",
+                "Vivek",
+                "Neha",
+                "Manan",
+                "Yash"
+        };
+        String[] addr = {
+                "123 Main St, Apt 4B",
+                "456 Oak Dr, Unit 12",
+                "789 Pine Ln, Suite 300",
+                "101 Maple Ave",
+                "202 Birch Rd, Floor 2",
+                "303 Cedar Blvd",
+                "404 Spruce St",
+                "505 Elm Ct",
+                "606 Willow Way, Apt 7",
+                "707 Ash Pl, Unit 5"
+        };
+        String[] phone = {
+                "9876543210",
+                "8765432109",
+                "7654321098",
+                "6543210987",
+                "5432109876",
+                "4321098765",
+                "3210987654",
+                "2109876543",
+                "1098765432",
+                "0987654321"
+        };
+        String[] username = {
+                "aarav",
+                "ananya",
+                "rohan",
+                "sneha",
+                "arjun",
+                "meera",
+                "vivek",
+                "neha",
+                "manan",
+                "yash"
+        };
+        String[] password = {
+                "aarav",
+                "ananya",
+                "rohan",
+                "sneha",
+                "arjun",
+                "meera",
+                "vivek",
+                "neha",
+                "manan",
+                "yash"
+        };
+        for (int i = 0; i < 10; i++) {
             Customer customer = new Customer(name[i], addr[i], phone[i], username[i], password[i]);
             bankingSystem.addCustomer(customer);
             Account account = new SavingsAccount(customer);
@@ -494,7 +483,6 @@ public class BankingSystem {
         BankingSystem bankingSystem = new BankingSystem();
         initializeData(bankingSystem);
         Scanner scanner = new Scanner(System.in);
-
         while (true) {
             System.out.println("Banking System Menu:");
             System.out.println("1. Register");
@@ -505,7 +493,6 @@ public class BankingSystem {
             System.out.print("Choose an option: ");
             int option = scanner.nextInt();
             scanner.nextLine(); // Consume newline
-
             switch (option) {
                 case 1:
                     System.out.print("Enter customer name: ");
@@ -540,7 +527,6 @@ public class BankingSystem {
                     }
                     System.out.println("Customer registered.");
                     System.out.println("Your account number is: " + customer.getAccounts().get(0).getAccountNumber());
-
                     break;
                 case 2:
                     System.out.print("Enter username: ");
@@ -590,10 +576,8 @@ public class BankingSystem {
                     System.out.println("Invalid option. Please try again.");
             }
         }
-
     }
     private static void customerMenu(BankingSystem bankingSystem, Customer customer, Scanner scanner) {
-
         int accountNumber = customer.getAccounts().get(0).getAccountNumber();
         while (true) {
             System.out.println("Customer Menu:");
@@ -608,7 +592,6 @@ public class BankingSystem {
             System.out.print("Choose an option: ");
             int option = scanner.nextInt();
             scanner.nextLine(); // Consume newline
-
             switch (option) {
                 case 1:
                     System.out.print("Enter deposit amount: ");
@@ -666,7 +649,7 @@ public class BankingSystem {
                     }
                     break;
                 case 6:
-                    loanSection(bankingSystem,customer,scanner);
+                    loanSection(bankingSystem, customer, scanner);
                     break;
                 case 7:
                     System.out.print("Enter current password: ");
@@ -683,9 +666,8 @@ public class BankingSystem {
             }
         }
     }
-
     private static void adminMenu(BankingSystem bankingSystem, Scanner scanner) {
-        while (true){
+        while (true) {
             System.out.println("Admin Menu:");
             System.out.println("1. Create a new user Account");
             System.out.println("2. Create a new Employee");
@@ -696,7 +678,6 @@ public class BankingSystem {
             System.out.print("Choose an option: ");
             int option = scanner.nextInt();
             scanner.nextLine(); // Consume newline
-
             switch (option) {
                 case 1:
                     System.out.print("Enter customer name: ");
@@ -745,7 +726,7 @@ public class BankingSystem {
                     Employee employee = new Employee(empName, empPhoneNumber, empUsername, empPassword);
                     bankingSystem.addEmployee(employee);
                     System.out.println("Employee created.");
-                    System.out.println("Thier employee number is: "+ employee.getEmployeeNumber());
+                    System.out.println("Thier employee number is: " + employee.getEmployeeNumber());
                     break;
                 case 3:
                     System.out.print("Enter account number: ");
@@ -787,8 +768,8 @@ public class BankingSystem {
             }
         }
     }
-    private static void employeeMenu(BankingSystem bankingSystem, Employee employee,  Scanner scanner) {
-        while (true){
+    private static void employeeMenu(BankingSystem bankingSystem, Employee employee, Scanner scanner) {
+        while (true) {
             System.out.println("Employee Menu:");
             System.out.println("1. Create a new user Account");
             System.out.println("2. View Account");
@@ -800,7 +781,6 @@ public class BankingSystem {
             System.out.print("Choose an option: ");
             int option = scanner.nextInt();
             scanner.nextLine(); // Consume newline
-
             switch (option) {
                 case 1:
                     System.out.print("Enter customer name: ");
@@ -869,7 +849,7 @@ public class BankingSystem {
                     }
                     break;
                 case 5:
-                    employeeLoanSection(bankingSystem,scanner);
+                    employeeLoanSection(bankingSystem, scanner);
                     break;
                 case 6:
                     System.out.print("Enter current password: ");
@@ -886,7 +866,7 @@ public class BankingSystem {
             }
         }
     }
-    private static void loanSection(BankingSystem bankingSystem, Customer customer, Scanner scanner){
+    private static void loanSection(BankingSystem bankingSystem, Customer customer, Scanner scanner) {
         while (true) {
             System.out.println("Loan Section");
             System.out.println("1. Apply for a new Loan");
@@ -904,33 +884,33 @@ public class BankingSystem {
                     customer.applyForLoan(amount);
                     break;
                 case 2:
-                    List<Loan> loans = customer.getLoans();
-                    if(loans.size()==0){
+                    List < Loan > loans = customer.getLoans();
+                    if (loans.size() == 0) {
                         System.out.println("You do not have any current loans.");
                         break;
-                    }else{
+                    } else {
                         int size = loans.size();
-                        for(int i = 0; i<size; i++){
+                        for (int i = 0; i < size; i++) {
                             Loan loan = loans.get(i);
                             int loanNumber = loan.getLoanId();
                             double loanAmount = loan.getLoanAmount();
                             boolean isApproved = loan.isApproved();
-                            if(isApproved){
-                                System.out.println("Approved Loan Number: "+loanNumber+" \tAmount:"+ loanAmount);
-                            }else{
-                                System.out.println("Pending Loan Number: "+loanNumber+" \tAmount:"+ loanAmount);
+                            if (isApproved) {
+                                System.out.println("Approved Loan Number: " + loanNumber + " \tAmount:" + loanAmount);
+                            } else {
+                                System.out.println("Pending Loan Number: " + loanNumber + " \tAmount:" + loanAmount);
                             }
                         }
                     }
                     break;
                 case 3:
-                    List<Loan> olderLoans = customer.getOlderLoans();
-                    if(olderLoans.size()==0){
+                    List < Loan > olderLoans = customer.getOlderLoans();
+                    if (olderLoans.size() == 0) {
                         System.out.println("You do not have any finised loans!");
                         break;
                     }
-                    for(Loan loan : olderLoans){
-                        System.out.println("Loan Number: "+ loan.getLoanId()+" \tOrignal Loan Amount: "+loan.getInitialLoanAmount());
+                    for (Loan loan: olderLoans) {
+                        System.out.println("Loan Number: " + loan.getLoanId() + " \tOrignal Loan Amount: " + loan.getInitialLoanAmount());
                     }
                     break;
                 case 4:
@@ -948,7 +928,7 @@ public class BankingSystem {
             }
         }
     }
-    private static void employeeLoanSection(BankingSystem bankingSystem, Scanner scanner){
+    private static void employeeLoanSection(BankingSystem bankingSystem, Scanner scanner) {
         while (true) {
             System.out.println("Loan Section");
             System.out.println("1. Approve Loans");
@@ -959,42 +939,41 @@ public class BankingSystem {
             int option = scanner.nextInt();
             switch (option) {
                 case 1:
-                    List<Loan> unapprovedLoans = bankingSystem.getUnapprovedLoans();
-                    for(Loan loan : unapprovedLoans){
+                    List < Loan > unapprovedLoans = bankingSystem.getUnapprovedLoans();
+                    for (Loan loan: unapprovedLoans) {
                         double loanAmount = loan.getLoanAmount();
                         int loanNumber = loan.getLoanId();
                         String customerName = loan.getCustomer().getName();
-                        System.out.println("Loan Number: "+loanNumber+" \tLoan Amount: "+loanAmount+" \tCustomer Name: "+customerName);
+                        System.out.println("Loan Number: " + loanNumber + " \tLoan Amount: " + loanAmount + " \tCustomer Name: " + customerName);
                     }
-
                     System.out.print("Choose loan number to approve: ");
                     int approvedLoanNumer = scanner.nextInt();
                     Loan loanToBeApproved = bankingSystem.findLoanByLoanNumber(approvedLoanNumer);
-                    if(loanToBeApproved!=null){
+                    if (loanToBeApproved != null) {
                         loanToBeApproved.approveLoan();
                         System.out.println("Loan has been approved");
-                    }else{
+                    } else {
                         System.out.println("Incorrect Loan number!");
                     }
                     break;
                 case 2:
-                    List<Loan> approvedLoans = bankingSystem.getApprovedLoans();
+                    List < Loan > approvedLoans = bankingSystem.getApprovedLoans();
                     System.out.println("Here are the details for all the current loans");
-                    for(Loan loan : approvedLoans){
+                    for (Loan loan: approvedLoans) {
                         double loanAmount = loan.getLoanAmount();
                         int loanNumber = loan.getLoanId();
                         String customerName = loan.getCustomer().getName();
-                        System.out.println("Loan Number: "+loanNumber+" \tLoan Amount: "+loanAmount+" \tCustomer Name: "+customerName);
+                        System.out.println("Loan Number: " + loanNumber + " \tLoan Amount: " + loanAmount + " \tCustomer Name: " + customerName);
                     }
                     break;
                 case 3:
-                    List<Loan> closedLoans = bankingSystem.getClosedLoans();
+                    List < Loan > closedLoans = bankingSystem.getClosedLoans();
                     System.out.println("Here are the details for all the current loans");
-                    for(Loan loan : closedLoans){
+                    for (Loan loan: closedLoans) {
                         double loanAmount = loan.getLoanAmount();
                         int loanNumber = loan.getLoanId();
                         String customerName = loan.getCustomer().getName();
-                        System.out.println("Loan Number: "+loanNumber+" \tLoan Amount: "+loanAmount+" \tCustomer Name: "+customerName);
+                        System.out.println("Loan Number: " + loanNumber + " \tLoan Amount: " + loanAmount + " \tCustomer Name: " + customerName);
                     }
                     break;
                 case 4:
@@ -1004,30 +983,4 @@ public class BankingSystem {
             }
         }
     }
-
 }
-
-
-
-
-
-
-
-
-
-
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-//public class Main {
-//    public static void main(String[] args) {
-//        //TIP Press <shortcut actionId="ShowIntentionActions"/> with your caret at the highlighted text
-//        // to see how IntelliJ IDEA suggests fixing it.
-//        System.out.printf("Hello and welcome!");
-//
-//        for (int i = 1; i <= 5; i++) {
-//            //TIP Press <shortcut actionId="Debug"/> to start debugging your code. We have set one <icon src="AllIcons.Debugger.Db_set_breakpoint"/> breakpoint
-//            // for you, but you can always add more by pressing <shortcut actionId="ToggleLineBreakpoint"/>.
-//            System.out.println("i = " + i);
-//        }
-//    }
-//}
