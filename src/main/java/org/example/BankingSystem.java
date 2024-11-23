@@ -472,11 +472,33 @@ public class BankingSystem {
                 "manan",
                 "yash"
         };
+        double[] loanAmount = {
+                1000,
+                2000,
+                3000,
+                4000,
+                5000,
+                6000,
+                7000,
+                8000,
+                9000,
+                10000
+        };
         for (int i = 0; i < 10; i++) {
-            Customer customer = new Customer(name[i], addr[i], phone[i], username[i], password[i]);
+            Customer customer =
+                    new Customer(name[i], addr[i], phone[i], username[i], password[i]);
             bankingSystem.addCustomer(customer);
             Account account = new SavingsAccount(customer);
             customer.addAccount(account);
+            customer.applyForLoan(loanAmount[i]);
+            if (i % 2 == 0) {
+                customer.getLoans().get(0).approveLoan();
+            }
+        }
+        for (int i = 0; i < 10; i++) {
+            Employee employee =
+                    new Employee(name[i], phone[i], username[i], password[i]);
+            bankingSystem.addEmployee(employee);
         }
     }
     public static void main(String[] args) {
