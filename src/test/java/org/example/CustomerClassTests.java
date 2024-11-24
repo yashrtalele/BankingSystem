@@ -79,6 +79,14 @@ public class CustomerClassTests {
     }
 
     @Test
+    public void getExistingLoansTest() {
+        List< Loan > loans = customer.getExistingLoans();
+        loans.get(0).approveLoan();
+        customer.payOffLoan(1656,3500);
+        Assertions.assertEquals(0, customer.getExistingLoans().size());
+    }
+
+    @Test
     public void payOffLoansNotApprovedTest() {
         outputStream.reset();
         List< Loan > loans = customer.getLoans();
