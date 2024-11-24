@@ -5,6 +5,6 @@ import org.junit.runners.Suite;
 
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({MainMenuTests.class,CustomerClassTests.class})
+@Suite.SuiteClasses({MainMenuTests.class,CustomerClassTests.class, CustomerMenuTests.class})
 public class BankingSystemTestSuites {
 }

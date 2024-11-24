@@ -260,6 +260,24 @@ class Customer {
         }
         return olderLoans;
     }
+    public void viewAccount() {
+        Account viewAccount = this.getAccounts().get(0);
+        if (viewAccount != null) {
+            System.out.println("Account Number: " + viewAccount.getAccountNumber());
+            System.out.println("Balance: " + viewAccount.getBalance());
+            System.out.println("Owner: " + viewAccount.getOwner().getName());
+        } else {
+            System.out.println("Account not found.");
+        }
+    }
+    public void viewTransactions() {
+        Account transactionAccount = this.getAccounts().get(0);
+        if (transactionAccount != null) {
+            transactionAccount.printTransactions();
+        } else {
+            System.out.println("Account not found.");
+        }
+    }
 }
 //Employee class
 class Employee {
@@ -662,22 +680,10 @@ public class BankingSystem {
                     }
                     break;
                 case 4:
-                    Account viewAccount = bankingSystem.findAccountByNumber(accountNumber);
-                    if (viewAccount != null) {
-                        System.out.println("Account Number: " + viewAccount.getAccountNumber());
-                        System.out.println("Balance: " + viewAccount.getBalance());
-                        System.out.println("Owner: " + viewAccount.getOwner().getName());
-                    } else {
-                        System.out.println("Account not found.");
-                    }
+                    customer.viewAccount();
                     break;
                 case 5:
-                    Account transactionAccount = bankingSystem.findAccountByNumber(accountNumber);
-                    if (transactionAccount != null) {
-                        transactionAccount.printTransactions();
-                    } else {
-                        System.out.println("Account not found.");
-                    }
+                    customer.viewTransactions();
                     break;
                 case 6:
                     loanSection(bankingSystem, customer, scanner);

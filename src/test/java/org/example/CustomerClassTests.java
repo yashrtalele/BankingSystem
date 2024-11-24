@@ -118,4 +118,23 @@ public class CustomerClassTests {
         customer.payOffLoan(id, loanAmount);
         Assertions.assertEquals(1, customer.getOlderLoans().size());
     }
+
+    @Test
+    public void validViewAccountTest() {
+        outputStream.reset();
+        customer.viewAccount();
+        String output = outputStream.toString();
+        Assertions.assertTrue(output.contains("Account Number:"));
+        Assertions.assertTrue(output.contains("Balance:"));
+        Assertions.assertTrue(output.contains("Owner:"));
+    }
+
+    @Test
+    public void validViewTransactionsTest() {
+        outputStream.reset();
+        customer.viewTransactions();
+        String output = outputStream.toString();
+        Integer accountNumber = customer.getAccounts().get(0).getAccountNumber();
+        Assertions.assertTrue(output.contains("Transaction history for account " + accountNumber));
+    }
 }
