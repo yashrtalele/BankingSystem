@@ -28,7 +28,7 @@ public class MainMenuTests {
     }
 
     @Test
-    public void testUserLogin() {
+    public void testDUPath() {
         Scanner mockScanner = mock(Scanner.class);
         BankingSystem mockBankingSystem = spy(new BankingSystem());
         Customer mockCustomer = mock(Customer.class);
@@ -87,34 +87,28 @@ public class MainMenuTests {
         Scanner mockScanner = mock(Scanner.class);
         BankingSystem mockBankingSystem = mock(BankingSystem.class);
 
-        // Prepare test data
         String username = "admin";
         String password = "admin123";
-        when(mockScanner.nextLine()).thenReturn(username).thenReturn(password);  // Mocking input
-        when(mockBankingSystem.authenticateAdmin(username, password)).thenReturn(true);  // Mocking authentication to return true
+        when(mockScanner.nextLine()).thenReturn(username).thenReturn(password);
+        when(mockBankingSystem.authenticateAdmin(username, password)).thenReturn(true);
 
-        // Set up to capture the system output
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         System.setOut(new PrintStream(outputStream));
 
-        // Call the method under test (simulating admin login)
         System.out.print("Enter admin username: ");
-        username = mockScanner.nextLine();  // Capturing the username input
+        username = mockScanner.nextLine();
         System.out.print("Enter admin password: ");
-        password = mockScanner.nextLine();  // Capturing the password input
+        password = mockScanner.nextLine();
 
         if (mockBankingSystem.authenticateAdmin(username, password)) {
             System.out.println("Admin login successful.");
-            // Simulate adminMenu
             mockBankingSystem.adminMenu(mockBankingSystem, mockScanner);
         } else {
             System.out.println("Invalid admin credentials.");
         }
 
-        // Verify that the authenticateAdmin method was called with the correct arguments
         verify(mockBankingSystem).authenticateAdmin(username, password);
 
-        // Check that the correct output was printed for a successful login
         String output = outputStream.toString();
         Assertions.assertTrue(output.contains("Admin login successful."), "Admin login message not found");
     }
@@ -154,7 +148,6 @@ public class MainMenuTests {
             Assertions.assertTrue(output.contains("Amount transferred."), "Transfer message not found");
 
         } finally {
-            // Restore original System.out
             System.setOut(originalOut);
         }
     }
