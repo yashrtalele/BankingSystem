@@ -4,10 +4,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 public class AdminMenuTests {
     private BankingSystem bankingSystem;
     private Customer customer;
     private Employee employee;
+    private ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
     @Before
     public void setUp() {
@@ -16,6 +20,7 @@ public class AdminMenuTests {
         bankingSystem.addCustomer(customer);
         employee = new Employee("manan","1234","manan","manan");
         bankingSystem.addEmployee(employee);
+        System.setOut(new PrintStream(outputStream));
     }
 
     @Test
@@ -130,6 +135,37 @@ public class AdminMenuTests {
         Employee employee1 = null;
         bankingSystem.addEmployee(employee1);
         Assertions.assertEquals(1, bankingSystem.getEmployees().size());
+    }
+
+    @Test
+    public void validInterestOnSavingsAccount(){
+        outputStream.reset();
+        Account account = bankingSystem.verifyAccount(customer,1);
+        account.deposit(1000);
+        account.applyInterest();
+        String output = outputStream.toString();
+        Assertions.assertTrue(output.contains("Interest applied"));
+    }
+
+    @Test
+    public void validInterestOnCurrentAccount(){
+        outputStream.reset();
+        Account account = bankingSystem.verifyAccount(customer,2);
+        account.deposit(1000);
+        account.applyInterest();
+        String output = outputStream.toString();
+        Assertions.assertTrue(output.contains("No interest on current accounts"));
+    }
+
+
+    @Test
+    public void invalidInterest(){
+        outputStream.reset();
+        Account account = bankingSystem.verifyAccount(customer,2);
+        account.deposit(1000);
+        account.applyInterest();
+        String output = outputStream.toString();
+        Assertions.assertFalse(output.contains("Interest applied"));
     }
 
 }
