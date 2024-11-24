@@ -251,6 +251,15 @@ class Customer {
     public List < Loan > getLoans() {
         return loans;
     }
+    public List < Loan > getExistingLoans() {
+        List<Loan> existingLoans = new ArrayList < > ();
+        for (Loan loan: loans) {
+            if (!loan.isClosed()) {
+                existingLoans.add(loan);
+            }
+        }
+        return existingLoans;
+    }
     public List < Loan > getOlderLoans() {
         List < Loan > olderLoans = new ArrayList < > ();
         for (Loan loan: loans) {
@@ -324,9 +333,72 @@ public class BankingSystem {
         this.employees = new ArrayList < > ();
     }
     public void addCustomer(Customer customer) {
+        if(customer==null) return;
         customers.add(customer);
     }
+    public List < Customer > getCustomers() {
+        return customers;
+    }
+    public List < Employee > getEmployees() {
+        return employees;
+    }
+    public Customer verify(String name,String address, String phoneNumber,String username,String password){
+        if(name.isBlank()){
+            System.out.println("Customer name cannot be blank");
+            return null;
+        }
+        if(phoneNumber.isBlank()){
+            System.out.println("Customer phone number cannot be blank");
+            return null;
+        }
+        if(username.isBlank()){
+            System.out.println("Customer username cannot be blank");
+            return null;
+        }
+        if(this.findCustomerByName(username)!=null){
+            System.out.println("Username already exists");
+            return null;
+        }
+        if(password.isBlank()){
+            System.out.println("Customer password cannot be blank");
+            return null;
+        }
+        return new Customer(name, address, phoneNumber, username, password);
+    }
+    public Account verifyAccount(Customer customer, int accountType){
+        Account account = null;
+        if (accountType == 1) {
+            account = new SavingsAccount(customer);
+        } else if (accountType == 2) {
+            account = new CurrentAccount(customer);
+        }
+        return account;
+    }
+    public Employee verifyEmployee(String name, String phoneNumber, String username, String password){
+        if(name.isBlank()){
+            System.out.println("Employee name cannot be blank");
+            return null;
+        }
+        if(phoneNumber.isBlank()){
+            System.out.println("Employee phone number cannot be blank");
+            return null;
+        }
+        if(username.isBlank()){
+            System.out.println("Employee username cannot be blank");
+            return null;
+        }
+        if(this.findEmployeeByName(username)!=null){
+            System.out.println("Employee already exists");
+            return null;
+        }
+        if(password.isBlank()){
+            System.out.println("Employee password cannot be blank");
+            return null;
+        }
+        return new Employee(name, phoneNumber, username, password);
+    }
     public void addEmployee(Employee employee) {
+        if(employee==null) return;
         employees.add(employee);
     }
     public Customer findCustomerByName(String name) {
@@ -727,26 +799,25 @@ public class BankingSystem {
                     String username = scanner.nextLine();
                     System.out.print("Enter password: ");
                     String password = scanner.nextLine();
-                    Customer customer = new Customer(name, address, phoneNumber, username, password);
-                    bankingSystem.addCustomer(customer);
+                    Customer customer = bankingSystem.verify(name,address,phoneNumber,username,password);
+                    if (customer == null) {
+                        break;
+                    }
                     System.out.println("Choose account type:");
                     System.out.println("1. Savings Account");
                     System.out.println("2. Current Account");
                     System.out.print("Choose an option: ");
                     int accountType = scanner.nextInt();
                     scanner.nextLine(); // Consume newline
-                    Account account = null;
-                    if (accountType == 1) {
-                        account = new SavingsAccount(customer);
-                    } else if (accountType == 2) {
-                        account = new CurrentAccount(customer);
-                    } else {
-                        System.out.println("Invalid account type.");
-                    }
+                    Account account = bankingSystem.verifyAccount(customer,accountType);
                     if (account != null) {
                         customer.addAccount(account);
                         System.out.println("Account added for customer " + customer.getName());
+                    }else{
+                        System.out.println("Invalid account type.");
+                        break;
                     }
+                    bankingSystem.addCustomer(customer);
                     System.out.println("Customer added.");
                     System.out.println("Their account number is: " + customer.getAccounts().get(0).getAccountNumber());
                     break;
@@ -760,7 +831,10 @@ public class BankingSystem {
                     String empUsername = scanner.nextLine();
                     System.out.print("Enter password: ");
                     String empPassword = scanner.nextLine();
-                    Employee employee = new Employee(empName, empPhoneNumber, empUsername, empPassword);
+                    Employee employee = bankingSystem.verifyEmployee(empName, empPhoneNumber, empUsername, empPassword);
+                    if (employee == null) {
+                        break;
+                    }
                     bankingSystem.addEmployee(employee);
                     System.out.println("Employee created.");
                     System.out.println("Thier employee number is: " + employee.getEmployeeNumber());
@@ -921,7 +995,7 @@ public class BankingSystem {
                     customer.applyForLoan(amount);
                     break;
                 case 2:
-                    List < Loan > loans = customer.getLoans();
+                    List < Loan > loans = customer.getExistingLoans();
                     if (loans.size() == 0) {
                         System.out.println("You do not have any current loans.");
                         break;
