@@ -88,7 +88,7 @@ class CurrentAccount extends Account {
     }
     @Override
     public void applyInterest() {
-        // No interest on current accounts
+        System.out.println("No interest on current accounts");
     }
 }
 // Transaction class to hold transaction details
