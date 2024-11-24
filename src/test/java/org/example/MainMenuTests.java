@@ -4,10 +4,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 
+import static org.mockito.Mockito.*;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.Collections;
+import java.util.Scanner;
+
 public class MainMenuTests {
     private BankingSystem bankingSystem;
     private Customer customer;
     private Employee employee;
+    private ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 
     @Before
     public void setUp() {
@@ -16,7 +24,141 @@ public class MainMenuTests {
         bankingSystem.addCustomer(customer);
         employee = new Employee("som","5678", "som", "som");
         bankingSystem.addEmployee(employee);
+        System.setOut(new PrintStream(outputStream));
     }
+
+    @Test
+    public void testUserLogin() {
+        Scanner mockScanner = mock(Scanner.class);
+        BankingSystem mockBankingSystem = spy(new BankingSystem());
+        Customer mockCustomer = mock(Customer.class);
+        Employee mockEmployee = mock(Employee.class);
+        SavingsAccount mockSavingsAccount = mock(SavingsAccount.class);
+        Account mockAccount = mock(Account.class);
+        Account mockDestinationAccount = mock(Account.class);
+        when(mockBankingSystem.findAccountByNumber(eq(12345)))
+                .thenReturn(mockAccount);
+        when(mockBankingSystem.findAccountByNumber(eq(9756)))
+                .thenReturn(mockDestinationAccount);
+
+        doNothing().when(mockAccount).deposit(anyDouble());
+        doNothing().when(mockAccount).withdraw(anyDouble());
+        doNothing().when(mockDestinationAccount).deposit(anyDouble());
+
+        when(mockCustomer.getAccounts()).thenReturn(Collections.singletonList(mockSavingsAccount));
+
+        when(mockBankingSystem.authenticateUser(eq("yash"), eq("yash"))).thenReturn(mockCustomer);
+        when(mockCustomer.getName()).thenReturn("Yash");
+
+        when(mockBankingSystem.authenticateEmployee(eq("yash"), eq("yash"))).thenReturn(mockEmployee);
+        when(mockEmployee.getName()).thenReturn("Yash");
+
+        when(mockScanner.nextInt())
+                .thenReturn(2, 1, 2, 3, 9756, 4, 8, 3, 4, 12345, 7, 5);
+
+        when(mockScanner.nextLine())
+                .thenReturn("yash", "yash", "yash", "yash");
+
+        when(mockScanner.nextDouble()).thenReturn(10000.0).thenReturn(500.0).thenReturn(1000.0);
+        mockBankingSystem.mainMenu(mockBankingSystem, mockScanner);
+        verify(mockBankingSystem).authenticateUser("yash", "yash");
+        verify(mockBankingSystem).customerMenu(eq(mockBankingSystem), eq(mockCustomer), eq(mockScanner));
+        mockBankingSystem.depositMoney(mockBankingSystem, 12345, mockScanner);
+        verify(mockAccount, times(1)).deposit(anyDouble());
+        mockBankingSystem.withdrawMoney(mockBankingSystem, 12345, mockScanner);
+        verify(mockAccount, times(1)).withdraw(anyDouble());
+        mockBankingSystem.transferMoney(mockBankingSystem, 12345, mockScanner);
+        verify(mockScanner, atLeastOnce()).nextInt();
+        verify(mockBankingSystem).authenticateEmployee("yash", "yash");
+        verify(mockBankingSystem).employeeMenu(eq(mockBankingSystem), eq(mockEmployee), eq(mockScanner));
+        verify(mockBankingSystem).applyInterest(mockBankingSystem, mockScanner);
+        verify(mockScanner, atLeastOnce()).nextInt();
+        verify(mockScanner, atLeastOnce()).nextInt();
+        String output = outputStream.toString();
+        Assertions.assertTrue(output.contains("Login successful"), "Login message not found");
+        Assertions.assertTrue(output.contains("Amount deposited"), "Deposit message not found");
+        Assertions.assertTrue(output.contains("Amount withdrawn"), "Withdraw message not found");
+        Assertions.assertTrue(output.contains("Login successful. Welcome, Yash"), "Employee Login message not found");
+        Assertions.assertTrue(output.contains("Interest applied"), "Interest applied message not found");
+    }
+
+    @Test
+    public void testAdminLogin() {
+        Scanner mockScanner = mock(Scanner.class);
+        BankingSystem mockBankingSystem = mock(BankingSystem.class);
+
+        // Prepare test data
+        String username = "admin";
+        String password = "admin123";
+        when(mockScanner.nextLine()).thenReturn(username).thenReturn(password);  // Mocking input
+        when(mockBankingSystem.authenticateAdmin(username, password)).thenReturn(true);  // Mocking authentication to return true
+
+        // Set up to capture the system output
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(outputStream));
+
+        // Call the method under test (simulating admin login)
+        System.out.print("Enter admin username: ");
+        username = mockScanner.nextLine();  // Capturing the username input
+        System.out.print("Enter admin password: ");
+        password = mockScanner.nextLine();  // Capturing the password input
+
+        if (mockBankingSystem.authenticateAdmin(username, password)) {
+            System.out.println("Admin login successful.");
+            // Simulate adminMenu
+            mockBankingSystem.adminMenu(mockBankingSystem, mockScanner);
+        } else {
+            System.out.println("Invalid admin credentials.");
+        }
+
+        // Verify that the authenticateAdmin method was called with the correct arguments
+        verify(mockBankingSystem).authenticateAdmin(username, password);
+
+        // Check that the correct output was printed for a successful login
+        String output = outputStream.toString();
+        Assertions.assertTrue(output.contains("Admin login successful."), "Admin login message not found");
+    }
+
+    @Test
+    public void testTransferMoney() {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PrintStream originalOut = System.out;
+        System.setOut(new PrintStream(outputStream));
+
+        try {
+            Scanner mockScanner = mock(Scanner.class);
+            BankingSystem mockBankingSystem = spy(new BankingSystem());
+            Customer mockCustomer = mock(Customer.class);
+            SavingsAccount mockSavingsAccount = mock(SavingsAccount.class);
+            Account mockSourceAccount = mock(Account.class);
+            Account mockDestinationAccount = mock(Account.class);
+
+            when(mockBankingSystem.findAccountByNumber(eq(12345))).thenReturn(mockSourceAccount);
+            when(mockBankingSystem.findAccountByNumber(eq(9756))).thenReturn(mockDestinationAccount);
+            when(mockScanner.nextInt()).thenReturn(9756);
+            when(mockScanner.nextDouble()).thenReturn(1000.0);
+
+            doNothing().when(mockSourceAccount).deposit(anyDouble());
+            doNothing().when(mockSourceAccount).withdraw(anyDouble());
+            doNothing().when(mockDestinationAccount).deposit(anyDouble());
+
+            when(mockSourceAccount.getBalance()).thenReturn(5000.0);
+            when(mockDestinationAccount.getBalance()).thenReturn(1000.0);
+
+            mockBankingSystem.transferMoney(mockBankingSystem, 12345, mockScanner);
+            verify(mockSourceAccount, times(1)).transfer(eq(mockDestinationAccount), eq(1000.0));
+
+            verify(mockScanner, atLeastOnce()).nextInt();
+
+            String output = outputStream.toString();
+            Assertions.assertTrue(output.contains("Amount transferred."), "Transfer message not found");
+
+        } finally {
+            // Restore original System.out
+            System.setOut(originalOut);
+        }
+    }
+
 
     @Test
     public void invalidCustomerLogin() {

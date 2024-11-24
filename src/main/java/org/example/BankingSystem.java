@@ -600,11 +600,22 @@ public class BankingSystem {
             bankingSystem.addEmployee(employee);
         }
     }
-    public static void main(String[] args) {
-        BankingSystem bankingSystem = new BankingSystem();
-        initializeData(bankingSystem);
-        Scanner scanner = new Scanner(System.in);
-        while (true) {
+    public void loginUser(BankingSystem bankingSystem, Scanner scanner) {
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+        Customer authenticatedCustomer = bankingSystem.authenticateUser(username, password);
+        if (authenticatedCustomer != null) {
+            System.out.println("Login successful. Welcome, " + authenticatedCustomer.getName() + "!");
+            customerMenu(bankingSystem, authenticatedCustomer, scanner);
+        } else {
+            System.out.println("Invalid username or password.");
+        }
+    }
+    public void mainMenu(BankingSystem bankingSystem, Scanner scanner) {
+        boolean isRunning = true;
+        while (isRunning) {
             System.out.println("Banking System Menu:");
             System.out.println("1. Register");
             System.out.println("2. Login as user");
@@ -613,7 +624,7 @@ public class BankingSystem {
             System.out.println("5. Exit");
             System.out.print("Choose an option: ");
             int option = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
+            scanner.nextLine();
             switch (option) {
                 case 1:
                     System.out.print("Enter customer name: ");
@@ -633,7 +644,7 @@ public class BankingSystem {
                     System.out.println("2. Current Account");
                     System.out.print("Choose an option: ");
                     int accountType = scanner.nextInt();
-                    scanner.nextLine(); // Consume newline
+                    scanner.nextLine();
                     Account account = null;
                     if (accountType == 1) {
                         account = new SavingsAccount(customer);
@@ -650,17 +661,7 @@ public class BankingSystem {
                     System.out.println("Your account number is: " + customer.getAccounts().get(0).getAccountNumber());
                     break;
                 case 2:
-                    System.out.print("Enter username: ");
-                    username = scanner.nextLine();
-                    System.out.print("Enter password: ");
-                    password = scanner.nextLine();
-                    Customer authenticatedCustomer = bankingSystem.authenticateUser(username, password);
-                    if (authenticatedCustomer != null) {
-                        System.out.println("Login successful. Welcome, " + authenticatedCustomer.getName() + "!");
-                        customerMenu(bankingSystem, authenticatedCustomer, scanner);
-                    } else {
-                        System.out.println("Invalid username or password.");
-                    }
+                    loginUser(bankingSystem, scanner);
                     break;
                 case 3:
                     // Employee case
@@ -691,14 +692,56 @@ public class BankingSystem {
                 case 5:
                     System.out.println("Exiting system.");
                     scanner.close();
-                    System.exit(0);
+                    isRunning = false;
                     break;
                 default:
                     System.out.println("Invalid option. Please try again.");
             }
         }
     }
-    private static void customerMenu(BankingSystem bankingSystem, Customer customer, Scanner scanner) {
+    public static void main(String[] args) {
+        BankingSystem bankingSystem = new BankingSystem();
+        initializeData(bankingSystem);
+        Scanner scanner = new Scanner(System.in);
+        bankingSystem.mainMenu(bankingSystem, scanner);
+    }
+    public void depositMoney(BankingSystem bankingSystem, int accountNumber, Scanner scanner) {
+        System.out.print("Enter deposit amount: ");
+        double depositAmount = scanner.nextDouble();
+        Account depositAccount = bankingSystem.findAccountByNumber(accountNumber);
+        if (depositAccount != null) {
+            depositAccount.deposit(depositAmount);
+            System.out.println("Amount deposited.");
+        } else {
+            System.out.println("Account not found.");
+        }
+    }
+    public void withdrawMoney(BankingSystem bankingSystem, int accountNumber, Scanner scanner) {
+        System.out.print("Enter withdrawal amount: ");
+        double withdrawalAmount = scanner.nextDouble();
+        Account withdrawAccount = bankingSystem.findAccountByNumber(accountNumber);
+        if (withdrawAccount != null) {
+            withdrawAccount.withdraw(withdrawalAmount);
+            System.out.println("Amount withdrawn.");
+        } else {
+            System.out.println("Account not found.");
+        }
+    }
+    public void transferMoney(BankingSystem bankingSystem, int sourceAccountNumber, Scanner scanner) {
+        System.out.print("Enter destination account number: ");
+        int destinationAccountNumber = scanner.nextInt();
+        System.out.print("Enter transfer amount: ");
+        double transferAmount = scanner.nextDouble();
+        Account sourceAccount = bankingSystem.findAccountByNumber(sourceAccountNumber);
+        Account destinationAccount = bankingSystem.findAccountByNumber(destinationAccountNumber);
+        if (sourceAccount != null && destinationAccount != null) {
+            sourceAccount.transfer(destinationAccount, transferAmount);
+            System.out.println("Amount transferred.");
+        } else {
+            System.out.println("Source or destination account not found.");
+        }
+    }
+    public void customerMenu(BankingSystem bankingSystem, Customer customer, Scanner scanner) {
         int accountNumber = customer.getAccounts().get(0).getAccountNumber();
         while (true) {
             System.out.println("Customer Menu:");
@@ -715,41 +758,13 @@ public class BankingSystem {
             scanner.nextLine(); // Consume newline
             switch (option) {
                 case 1:
-                    System.out.print("Enter deposit amount: ");
-                    double depositAmount = scanner.nextDouble();
-                    Account depositAccount = bankingSystem.findAccountByNumber(accountNumber);
-                    if (depositAccount != null) {
-                        depositAccount.deposit(depositAmount);
-                        System.out.println("Amount deposited.");
-                    } else {
-                        System.out.println("Account not found.");
-                    }
+                    depositMoney(bankingSystem, accountNumber, scanner);
                     break;
                 case 2:
-                    System.out.print("Enter withdrawal amount: ");
-                    double withdrawalAmount = scanner.nextDouble();
-                    Account withdrawAccount = bankingSystem.findAccountByNumber(accountNumber);
-                    if (withdrawAccount != null) {
-                        withdrawAccount.withdraw(withdrawalAmount);
-                        System.out.println("Amount withdrawn.");
-                    } else {
-                        System.out.println("Account not found.");
-                    }
+                    withdrawMoney(bankingSystem, accountNumber, scanner);
                     break;
                 case 3:
-                    int sourceAccountNumber = accountNumber;
-                    System.out.print("Enter destination account number: ");
-                    int destinationAccountNumber = scanner.nextInt();
-                    System.out.print("Enter transfer amount: ");
-                    double transferAmount = scanner.nextDouble();
-                    Account sourceAccount = bankingSystem.findAccountByNumber(sourceAccountNumber);
-                    Account destinationAccount = bankingSystem.findAccountByNumber(destinationAccountNumber);
-                    if (sourceAccount != null && destinationAccount != null) {
-                        sourceAccount.transfer(destinationAccount, transferAmount);
-                        System.out.println("Amount transferred.");
-                    } else {
-                        System.out.println("Source or destination account not found.");
-                    }
+                    transferMoney(bankingSystem, accountNumber, scanner);
                     break;
                 case 4:
                     customer.viewAccount();
@@ -775,7 +790,7 @@ public class BankingSystem {
             }
         }
     }
-    private static void adminMenu(BankingSystem bankingSystem, Scanner scanner) {
+    public void adminMenu(BankingSystem bankingSystem, Scanner scanner) {
         while (true) {
             System.out.println("Admin Menu:");
             System.out.println("1. Create a new user Account");
@@ -837,7 +852,7 @@ public class BankingSystem {
                     }
                     bankingSystem.addEmployee(employee);
                     System.out.println("Employee created.");
-                    System.out.println("Thier employee number is: " + employee.getEmployeeNumber());
+                    System.out.println("Their employee number is: " + employee.getEmployeeNumber());
                     break;
                 case 3:
                     System.out.print("Enter account number: ");
@@ -879,7 +894,18 @@ public class BankingSystem {
             }
         }
     }
-    private static void employeeMenu(BankingSystem bankingSystem, Employee employee, Scanner scanner) {
+    public void applyInterest(BankingSystem bankingSystem, Scanner scanner) {
+        System.out.print("Enter account number: ");
+        int accountNumber = scanner.nextInt();
+        Account interestAccount = bankingSystem.findAccountByNumber(accountNumber);
+        if (interestAccount != null) {
+            interestAccount.applyInterest();
+            System.out.println("Interest applied");
+        } else {
+            System.out.println("Account not found.");
+        }
+    }
+    public void employeeMenu(BankingSystem bankingSystem, Employee employee, Scanner scanner) {
         while (true) {
             System.out.println("Employee Menu:");
             System.out.println("1. Create a new user Account");
@@ -950,14 +976,15 @@ public class BankingSystem {
                     }
                     break;
                 case 4:
-                    System.out.print("Enter account number: ");
-                    accountNumber = scanner.nextInt();
-                    Account interestAccount = bankingSystem.findAccountByNumber(accountNumber);
-                    if (interestAccount != null) {
-                        interestAccount.applyInterest();
-                    } else {
-                        System.out.println("Account not found.");
-                    }
+//                    System.out.print("Enter account number: ");
+//                    accountNumber = scanner.nextInt();
+//                    Account interestAccount = bankingSystem.findAccountByNumber(accountNumber);
+//                    if (interestAccount != null) {
+//                        interestAccount.applyInterest();
+//                    } else {
+//                        System.out.println("Account not found.");
+//                    }
+                    applyInterest(bankingSystem, scanner);
                     break;
                 case 5:
                     employeeLoanSection(bankingSystem, scanner);
