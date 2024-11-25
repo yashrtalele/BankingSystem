@@ -951,14 +951,6 @@ public class BankingSystem {
                     }
                     break;
                 case 4:
-//                    System.out.print("Enter account number: ");
-//                    accountNumber = scanner.nextInt();
-//                    Account interestAccount = bankingSystem.findAccountByNumber(accountNumber);
-//                    if (interestAccount != null) {
-//                        interestAccount.applyInterest();
-//                    } else {
-//                        System.out.println("Account not found.");
-//                    }
                     applyInterest(bankingSystem, scanner);
                     break;
                 case 5:
