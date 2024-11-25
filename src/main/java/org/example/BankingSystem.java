@@ -613,6 +613,39 @@ public class BankingSystem {
             System.out.println("Invalid username or password.");
         }
     }
+    public void register(BankingSystem bankingSystem, Scanner scanner) {
+        System.out.print("Enter customer name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter customer address: ");
+        String address = scanner.nextLine();
+        System.out.print("Enter customer phone number: ");
+        String phoneNumber = scanner.nextLine();
+        System.out.print("Enter username: ");
+        String username = scanner.nextLine();
+        System.out.print("Enter password: ");
+        String password = scanner.nextLine();
+        Customer customer = bankingSystem.verify(name,address,phoneNumber,username,password);
+        if (customer == null) {
+            return;
+        }
+        System.out.println("Choose account type:");
+        System.out.println("1. Savings Account");
+        System.out.println("2. Current Account");
+        System.out.print("Choose an option: ");
+        int accountType = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+        Account account = bankingSystem.verifyAccount(customer,accountType);
+        if (account != null) {
+            customer.addAccount(account);
+            System.out.println("Account added for customer " + customer.getName());
+        }else{
+            System.out.println("Invalid account type.");
+            return;
+        }
+        bankingSystem.addCustomer(customer);
+        System.out.println("Customer added.");
+        System.out.println("Their account number is: " + customer.getAccounts().get(0).getAccountNumber());
+    }
     public void mainMenu(BankingSystem bankingSystem, Scanner scanner) {
         boolean isRunning = true;
         while (isRunning) {
@@ -627,38 +660,7 @@ public class BankingSystem {
             scanner.nextLine();
             switch (option) {
                 case 1:
-                    System.out.print("Enter customer name: ");
-                    String name = scanner.nextLine();
-                    System.out.print("Enter customer address: ");
-                    String address = scanner.nextLine();
-                    System.out.print("Enter customer phone number: ");
-                    String phoneNumber = scanner.nextLine();
-                    System.out.print("Enter username: ");
-                    String username = scanner.nextLine();
-                    System.out.print("Enter password: ");
-                    String password = scanner.nextLine();
-                    Customer customer = new Customer(name, address, phoneNumber, username, password);
-                    bankingSystem.addCustomer(customer);
-                    System.out.println("Choose account type:");
-                    System.out.println("1. Savings Account");
-                    System.out.println("2. Current Account");
-                    System.out.print("Choose an option: ");
-                    int accountType = scanner.nextInt();
-                    scanner.nextLine();
-                    Account account = null;
-                    if (accountType == 1) {
-                        account = new SavingsAccount(customer);
-                    } else if (accountType == 2) {
-                        account = new CurrentAccount(customer);
-                    } else {
-                        System.out.println("Invalid account type.");
-                    }
-                    if (account != null) {
-                        customer.addAccount(account);
-                        System.out.println("Account added for customer " + customer.getName());
-                    }
-                    System.out.println("Customer registered.");
-                    System.out.println("Your account number is: " + customer.getAccounts().get(0).getAccountNumber());
+                    register(bankingSystem, scanner);
                     break;
                 case 2:
                     loginUser(bankingSystem, scanner);
@@ -666,9 +668,9 @@ public class BankingSystem {
                 case 3:
                     // Employee case
                     System.out.print("Enter username: ");
-                    username = scanner.nextLine();
+                    String username = scanner.nextLine();
                     System.out.print("Enter password: ");
-                    password = scanner.nextLine();
+                    String password = scanner.nextLine();
                     Employee authenticatedEmployee = bankingSystem.authenticateEmployee(username, password);
                     if (authenticatedEmployee != null) {
                         System.out.println("Login successful. Welcome, " + authenticatedEmployee.getName() + "!");
@@ -804,37 +806,7 @@ public class BankingSystem {
             scanner.nextLine(); // Consume newline
             switch (option) {
                 case 1:
-                    System.out.print("Enter customer name: ");
-                    String name = scanner.nextLine();
-                    System.out.print("Enter customer address: ");
-                    String address = scanner.nextLine();
-                    System.out.print("Enter customer phone number: ");
-                    String phoneNumber = scanner.nextLine();
-                    System.out.print("Enter username: ");
-                    String username = scanner.nextLine();
-                    System.out.print("Enter password: ");
-                    String password = scanner.nextLine();
-                    Customer customer = bankingSystem.verify(name,address,phoneNumber,username,password);
-                    if (customer == null) {
-                        break;
-                    }
-                    System.out.println("Choose account type:");
-                    System.out.println("1. Savings Account");
-                    System.out.println("2. Current Account");
-                    System.out.print("Choose an option: ");
-                    int accountType = scanner.nextInt();
-                    scanner.nextLine(); // Consume newline
-                    Account account = bankingSystem.verifyAccount(customer,accountType);
-                    if (account != null) {
-                        customer.addAccount(account);
-                        System.out.println("Account added for customer " + customer.getName());
-                    }else{
-                        System.out.println("Invalid account type.");
-                        break;
-                    }
-                    bankingSystem.addCustomer(customer);
-                    System.out.println("Customer added.");
-                    System.out.println("Their account number is: " + customer.getAccounts().get(0).getAccountNumber());
+                    register(bankingSystem, scanner);
                     break;
                 case 2:
                     // Add new Employee
