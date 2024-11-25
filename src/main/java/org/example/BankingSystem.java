@@ -240,6 +240,9 @@ class Customer {
                 if (!loan.isApproved()) {
                     System.out.println("Loan is not yet approved!");
                     return;
+                } else if(loan.getLoanAmount() < amount) {
+                    System.out.println("Payoff amount exceeded!");
+                    return;
                 }
                 loan.payOffLoan(amount);
                 System.out.println("Loan paid off!");
